@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThemeForge AI — Edit Shopify Themes with a Prompt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#060811;
+  --bg2:#0a0d1a;
+  --surface:rgba(255,255,255,0.035);
+  --surface-hover:rgba(255,255,255,0.065);
+  --border:rgba(255,255,255,0.07);
+  --border-glow:rgba(20,220,170,0.25);
+  --teal:#14dcaa;
+  --teal-soft:rgba(20,220,170,0.10);
+  --teal-glow:rgba(20,220,170,0.30);
+  --blue:#5b9cf6;
+  --blue-soft:rgba(91,156,246,0.10);
+  --purple:#a78bfa;
+  --purple-soft:rgba(167,139,250,0.10);
+  --amber:#f59e0b;
+  --text:#f0f4ff;
+  --text-2:rgba(240,244,255,0.55);
+  --text-3:rgba(240,244,255,0.28);
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+  --display:'Space Grotesk',sans-serif;
+  --r:16px;
+  --shadow-card:0 4px 24px rgba(0,0,0,0.45),0 1px 0 rgba(255,255,255,0.04) inset;
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+/* ── SVG HIDDEN FILTERS ── */
+.svg-filters{position:absolute;width:0;height:0;pointer-events:none}
+
+/* ── GRID OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%);
+}
+
+/* ── AMBIENT ORBS ── */
+.orb-field{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:.18;animation:float 20s ease-in-out infinite}
+.o1{width:800px;height:800px;background:radial-gradient(circle,#00e0a3,transparent);top:-300px;left:-200px;animation-delay:0s}
+.o2{width:600px;height:600px;background:radial-gradient(circle,#4f8ef7,transparent);top:25%;right:-150px;animation-delay:-7s}
+.o3{width:700px;height:700px;background:radial-gradient(circle,#9b72f6,transparent);bottom:-200px;left:20%;animation-delay:-13s}
+.o4{width:350px;height:350px;background:radial-gradient(circle,#00e0a3,transparent);top:55%;right:25%;animation-delay:-3s;opacity:.1}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-25px) scale(1.04)}66%{transform:translate(-25px,35px) scale(.96)}}
+
+/* ── GLASS SYSTEM ── */
+.g{
+  background:var(--surface);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  position:relative;
+  overflow:hidden;
+  transition:background .3s,border-color .3s,transform .35s cubic-bezier(.22,1,.36,1),box-shadow .3s;
+  box-shadow:var(--shadow-card);
+}
+.g::before{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,0.06) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+.g > *{position:relative;z-index:1}
+.g:hover{background:var(--surface-hover);border-color:rgba(20,220,170,0.20);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.55),0 1px 0 rgba(255,255,255,0.05) inset}
+
+/* Liquid glass variant */
+.g-liquid{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--r);
+  box-shadow:
+    inset 2px 2px 1px rgba(255,255,255,0.18),
+    inset -1px -1px 1px rgba(255,255,255,0.1),
+    0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+section{padding:110px 0;position:relative;z-index:1}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:14px 44px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,8,17,.75);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  transition:background .3s;
+}
+.logo{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.logo em{font-style:normal;color:var(--teal)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--text-2);text-decoration:none;font-size:13.5px;font-weight:500;transition:color .2s;letter-spacing:0}
+.nav-links a:hover{color:var(--text)}
+.nav-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--teal);color:#040d0a;
+  border:none;padding:9px 20px;border-radius:100px;
+  font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:-.1px;
+  transition:filter .2s,transform .2s,box-shadow .2s;
+  box-shadow:0 0 0 0 var(--teal-glow);
+}
+.nav-pill:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 20px var(--teal-glow)}
+
+/* ── HERO ── */
+#hero{padding-top:150px;padding-bottom:100px;text-align:center}
+.hero-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--teal-soft);border:1px solid rgba(0,224,163,.22);
+  border-radius:100px;padding:7px 18px;
+  font-size:12.5px;font-weight:600;color:var(--teal);letter-spacing:.4px;
+  margin-bottom:36px;animation:fadeUp .6s ease both;
+}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,224,163,.6)}50%{box-shadow:0 0 0 6px rgba(0,224,163,0)}}
+
+h1{
+  font-family:var(--display);
+  font-size:clamp(46px,7vw,86px);
+  font-weight:700;line-height:1.04;letter-spacing:-2.5px;
+  margin-bottom:24px;animation:fadeUp .7s ease .1s both;
+}
+h1 .gr{
+  background:linear-gradient(135deg,var(--teal) 0%,#5b9cf6 50%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-desc{
+  font-size:18px;color:var(--text-2);max-width:560px;margin:0 auto 40px;
+  line-height:1.75;animation:fadeUp .7s ease .2s both;
+}
+.hero-btns{display:flex;gap:12px;justify-content:center;margin-bottom:72px;animation:fadeUp .7s ease .3s both}
+.btn-p{
+  background:var(--teal);color:#030d08;border:none;
+  padding:14px 30px;border-radius:100px;
+  font-family:var(--sans);font-size:14.5px;font-weight:600;cursor:pointer;
+  transition:filter .2s,transform .2s,box-shadow .2s;box-shadow:0 0 28px var(--teal-glow);
+  letter-spacing:-.1px;
+}
+.btn-p:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 4px 40px var(--teal-glow)}
+.btn-o{
+  background:rgba(255,255,255,.04);color:var(--text);
+  border:1px solid rgba(255,255,255,.1);
+  padding:14px 30px;border-radius:100px;
+  font-family:var(--sans);font-size:14.5px;font-weight:500;cursor:pointer;
+  transition:all .25s;backdrop-filter:blur(10px);letter-spacing:-.1px;
+}
+.btn-o:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);transform:translateY(-1px)}
+
+/* ── HERO WINDOW ── */
+.hero-win{max-width:860px;margin:0 auto;animation:fadeUp .8s ease .4s both}
+.win-bar{
+  display:flex;align-items:center;gap:8px;padding:14px 22px;
+  border-bottom:1px solid var(--border);
+}
+.dot{width:12px;height:12px;border-radius:50%}
+.d-r{background:#ff5f57}.d-y{background:#febc2e}.d-g{background:#28c840}
+.win-addr{
+  flex:1;text-align:center;font-size:12px;color:var(--text-3);
+  font-family:var(--mono);letter-spacing:.5px;
+}
+.win-body{display:grid;grid-template-columns:1fr 1.1fr;gap:0;min-height:240px}
+.win-left{
+  padding:24px;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;gap:16px;
+}
+.win-label{font-size:10px;color:var(--teal);font-family:var(--mono);letter-spacing:2px;text-transform:uppercase}
+.prompt-box{
+  background:rgba(0,224,163,.06);border:1px solid rgba(0,224,163,.18);
+  border-radius:14px;padding:16px;font-size:14px;color:var(--text);line-height:1.65;
+}
+.cursor-blink{display:inline-block;width:2px;height:14px;background:var(--teal);vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.win-tags{display:flex;flex-wrap:wrap;gap:7px}
+.wtag{font-size:11px;font-family:var(--mono);border-radius:6px;padding:3px 10px;border:1px solid}
+.wtag-g{color:var(--teal);background:var(--teal-soft);border-color:rgba(0,224,163,.2)}
+.wtag-b{color:#7db5fb;background:var(--blue-soft);border-color:rgba(79,142,247,.2)}
+.wtag-p{color:#c4a6f9;background:var(--purple-soft);border-color:rgba(155,114,246,.2)}
+.code-pane{
+  padding:22px 20px;background:rgba(0,0,0,.45);border-radius:0 var(--r) var(--r) 0;
+  font-family:var(--mono);font-size:12px;line-height:1.9;overflow:hidden;
+}
+.cl{display:block}.ct{color:var(--teal)}.cb{color:#7db5fb}.cy{color:#fbbf24}.cm{color:#6b7280}.cw{color:#eef2ff}.cp{color:#c4a6f9}
+
+/* ── SECTION LABELS ── */
+.sl{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:14px;font-family:var(--sans)}
+.sh{font-family:var(--display);font-size:clamp(32px,4.2vw,50px);font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin-bottom:18px}
+.sd{font-size:16.5px;color:var(--text-2);max-width:520px;line-height:1.8;font-weight:400}
+.sec-head{margin-bottom:64px}
+.teal-line{width:48px;height:3px;background:linear-gradient(90deg,var(--teal),transparent);border-radius:2px;margin:18px 0}
+
+/* ── MARQUEE (social proof) ── */
+#marquee-sec{padding:40px 0 0;border-top:1px solid var(--border)}
+.marquee-label{text-align:center;font-size:12px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px}
+.marquee-track{overflow:hidden;position:relative}
+.marquee-track::before,.marquee-track::after{
+  content:'';position:absolute;top:0;bottom:0;width:120px;z-index:2;pointer-events:none;
+}
+.marquee-track::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.marquee-track::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+.marquee-inner{display:flex;gap:48px;animation:marq 30s linear infinite;width:max-content}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.m-item{display:flex;align-items:center;gap:10px;opacity:.38;transition:opacity .2s;white-space:nowrap;cursor:default}
+.m-item:hover{opacity:.8}
+.m-icon{width:28px;height:28px;border-radius:6px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px}
+.m-name{font-size:14px;font-weight:600;font-family:var(--display);color:var(--text)}
+
+/* ── PROBLEM ── */
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.prob-card{padding:32px 30px}
+.prob-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:20px;
+}
+.ic-r{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15)}
+.ic-o{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.15)}
+.ic-a{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15)}
+.prob-card h3{font-family:var(--display);font-size:17px;font-weight:600;margin-bottom:10px;letter-spacing:-.2px}
+.prob-card p{font-size:14px;color:var(--text-2);line-height:1.8}
+
+/* ── FEATURES ── */
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.feat-card{padding:36px 32px}
+.feat-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--teal),transparent);
+  opacity:0;transition:opacity .35s;border-radius:var(--r) var(--r) 0 0;
+}
+.feat-card:hover::after{opacity:.8}
+.feat-num{font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:2px;margin-bottom:16px;display:block;opacity:.7}
+.feat-card h3{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:12px;letter-spacing:-.3px}
+.feat-card p{font-size:14px;color:var(--text-2);line-height:1.82;font-weight:400}
+.feat-badge{
+  display:inline-block;margin-top:18px;
+  background:var(--teal-soft);border:1px solid rgba(20,220,170,.18);
+  color:var(--teal);border-radius:6px;font-size:10px;font-weight:600;
+  padding:3px 10px;font-family:var(--mono);letter-spacing:.3px;
+}
+
+/* ── HOW IT WORKS ── */
+.flow{display:flex;flex-direction:column}
+.flow-row{display:grid;grid-template-columns:72px 1fr;gap:0 32px;position:relative}
+.flow-row:not(:last-child) .flow-line{
+  position:absolute;left:35px;top:62px;width:2px;
+  height:calc(100% + 0px);
+  background:linear-gradient(180deg,rgba(0,224,163,.35),rgba(0,224,163,.04));
+}
+.step-wrap{display:flex;flex-direction:column;align-items:center;padding-top:24px}
+.step-n{
+  width:54px;height:54px;background:var(--teal-soft);
+  border:1px solid rgba(0,224,163,.28);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:18px;font-weight:800;color:var(--teal);
+  position:relative;z-index:1;flex-shrink:0;
+}
+.step-body{padding:22px 0 50px}
+.step-body h3{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:8px;letter-spacing:-.4px}
+.step-body p{font-size:15px;color:var(--text-2);line-height:1.78;max-width:560px}
+
+/* ── ENGINE ── */
+.eng-layout{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.stages{display:flex;flex-direction:column;gap:10px}
+.stage{display:flex;align-items:center;gap:16px;padding:15px 18px;cursor:default;border-radius:14px}
+.stage:hover{background:rgba(0,224,163,.06);border-color:rgba(0,224,163,.22)}
+.s-icon{
+  width:38px;height:38px;flex-shrink:0;
+  background:var(--teal-soft);border:1px solid rgba(0,224,163,.2);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.s-text{flex:1}
+.s-name{font-weight:600;font-size:15px}
+.s-desc{font-size:12.5px;color:var(--text-2)}
+.s-num{font-family:var(--mono);font-size:10px;color:var(--teal);background:var(--teal-soft);border:1px solid rgba(0,224,163,.15);border-radius:4px;padding:2px 8px}
+.eng-panel{padding:38px}
+.ep-title{font-family:var(--display);font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.18;margin-bottom:18px}
+.ep-title span{color:var(--teal)}
+.ep-body{font-size:14.5px;color:var(--text-2);line-height:1.82;margin-bottom:26px}
+.metrics{display:flex;gap:28px;flex-wrap:wrap}
+.metric{text-align:center}
+.mv{font-family:var(--display);font-size:36px;font-weight:800;color:var(--teal);line-height:1}
+.ml{font-size:11px;color:var(--text-3);margin-top:5px;letter-spacing:.5px}
+
+/* ── TECH STACK ── */
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tech-card{padding:30px}
+.tl{font-size:10px;font-family:var(--mono);color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.tn{font-family:var(--display);font-size:21px;font-weight:700;margin-bottom:9px}
+.td{font-size:13.5px;color:var(--text-2);line-height:1.68}
+.t-pill{
+  display:inline-block;margin-top:14px;
+  background:var(--blue-soft);border:1px solid rgba(79,142,247,.2);
+  color:#7db5fb;border-radius:6px;font-size:10.5px;font-family:var(--mono);padding:3px 9px;
+}
+
+/* ── RISKS ── */
+.risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.risk-card{padding:30px}
+.r-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.r-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.r-hi{background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,.55)}
+.r-md{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.55)}
+.r-lo{background:#6b7280}
+.r-title{font-family:var(--display);font-size:17px;font-weight:700}
+.r-impact{font-size:13.5px;color:var(--text-2);margin-bottom:14px;line-height:1.7}
+.r-fix{
+  background:rgba(0,224,163,.05);border-left:2px solid var(--teal);
+  border-radius:0 10px 10px 0;padding:11px 15px;
+  font-size:13px;color:var(--text-2);line-height:1.7;
+}
+.r-fix strong{color:var(--teal);font-weight:600}
+
+/* ── ROADMAP ── */
+.road-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.phase-card{padding:30px;position:relative}
+.ph-lbl{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:2.5px;margin-bottom:12px}
+.ph-title{font-family:var(--display);font-size:21px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px}
+.ph-desc{font-size:13.5px;color:var(--text-2);line-height:1.72}
+.ph-badge{
+  position:absolute;top:20px;right:20px;
+  font-size:10px;font-family:var(--mono);padding:3px 11px;border-radius:100px;
+}
+.ph-now{background:var(--teal-soft);color:var(--teal);border:1px solid rgba(0,224,163,.25)}
+.ph-next{background:var(--blue-soft);color:#7db5fb;border:1px solid rgba(79,142,247,.2)}
+.ph-later{background:var(--purple-soft);color:#c4a6f9;border:1px solid rgba(155,114,246,.2)}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);backdrop-filter:blur(20px)}
+.stat-item{
+  padding:36px 24px;text-align:center;
+  border-right:1px solid var(--border);
+}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:var(--display);font-size:38px;font-weight:700;color:var(--teal);line-height:1;margin-bottom:10px;letter-spacing:-1px}
+.stat-desc{font-size:13px;color:var(--text-2);line-height:1.5}
+
+/* ── CTA ── */
+#cta{padding:120px 0;text-align:center}
+.cta-wrap{max-width:640px;margin:0 auto;padding:60px 52px}
+.cta-wrap h2{font-family:var(--display);font-size:clamp(30px,4vw,48px);font-weight:700;margin-bottom:16px;letter-spacing:-1.5px;line-height:1.1}
+.cta-wrap p{font-size:16px;color:var(--text-2);margin-bottom:36px;line-height:1.75}
+.cta-form{display:flex;gap:10px;max-width:440px;margin:0 auto}
+.cta-input{
+  flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:100px;padding:13px 22px;
+  color:var(--text);font-family:var(--sans);font-size:14.5px;outline:none;
+  transition:border-color .25s,background .25s;
+}
+.cta-input::placeholder{color:var(--text-3)}
+.cta-input:focus{border-color:rgba(20,220,170,.4);background:rgba(255,255,255,.06)}
+.cta-note{font-size:12.5px;color:var(--text-3);margin-top:14px}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:44px 0;position:relative;z-index:1}
+.ft{display:flex;align-items:center;justify-content:space-between}
+.ft-logo{font-family:var(--display);font-size:18px;font-weight:800}
+.ft-logo em{font-style:normal;color:var(--teal)}
+.ft-links{display:flex;gap:28px}
+.ft-links a{font-size:13px;color:var(--text-3);text-decoration:none;transition:color .2s}
+.ft-links a:hover{color:var(--teal)}
+.ft-copy{font-size:12.5px;color:var(--text-3)}
+
+/* ── REVEAL ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+.rev{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+.rev.vis{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:14px 20px}.nav-links{display:none}
+  .prob-grid,.feat-grid,.tech-grid,.risk-grid,.road-grid,.stats-row{grid-template-columns:1fr}
+  .stats-row{border-radius:var(--r)}.stat-item{border-right:none;border-bottom:1px solid var(--border)}
+  .stat-item:last-child{border-bottom:none}
+  .eng-layout{grid-template-columns:1fr}
+  .win-body{grid-template-columns:1fr}
+  .code-pane{border-radius:0 0 var(--r) var(--r)}
+  .cta-form{flex-direction:column}
+  .ft{flex-direction:column;gap:18px;text-align:center}.ft-links{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- SVG liquid glass distortion filter -->
+<svg class="svg-filters" aria-hidden="true">
+  <filter id="liquid-glass" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <feTurbulence type="fractalNoise" baseFrequency="0.001 0.004" numOctaves="1" seed="17" result="turbulence"/>
+    <feComponentTransfer in="turbulence" result="mapped">
+      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"/>
+      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0"/>
+      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"/>
+    </feComponentTransfer>
+    <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap"/>
+    <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
+      <fePointLight x="-200" y="-200" z="300"/>
+    </feSpecularLighting>
+    <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"/>
+    <feDisplacementMap in="SourceGraphic" in2="softMap" scale="120" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="orb-field">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="orb o4"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Theme<em>Forge</em> <span style="color:var(--text-3);font-weight:400;font-size:14px">AI</span></div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#engine">Engine</a></li>
+    <li><a href="#tech">Stack</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+  <button class="nav-pill">
+    <span style="width:7px;height:7px;border-radius:50%;background:#04060f;display:inline-block"></span>
+    Get Early Access
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="wrap">
+    <div class="hero-chip"><span class="pulse-dot"></span> Now in private beta — Shopify theme editing reimagined</div>
+    <h1>Edit your theme<br>with a <span class="gr">single prompt</span></h1>
+    <p class="hero-desc">Stop pasting raw AI code into live Shopify themes. ThemeForge produces clean, validated Liquid — previewed on your real store, published only when you approve.</p>
+    <div class="hero-btns">
+      <button class="btn-p">Get Early Access →</button>
+      <button class="btn-o">See How It Works</button>
+    </div>
+
+    <!-- Editor window -->
+    <div class="hero-win g g-liquid" style="animation:fadeUp .8s ease .4s both">
+      <div class="win-bar">
+        <div class="dot d-r"></div><div class="dot d-y"></div><div class="dot d-g"></div>
+        <div class="win-addr">themeforge.ai / dawn-theme / sections / hero.liquid</div>
+        <div style="width:52px"></div>
+      </div>
+      <div class="win-body">
+        <div class="win-left">
+          <span class="win-label">// Your prompt</span>
+          <div class="prompt-box">
+            Restyle the hero section — dark overlay, larger headline in teal, and a subtle parallax on scroll<span class="cursor-blink"></span>
+          </div>
+          <div class="win-tags">
+            <span class="wtag wtag-g">✓ Scoped → sections/hero.liquid</span>
+            <span class="wtag wtag-b">✓ Syntax validated</span>
+            <span class="wtag wtag-p">✓ Draft preview ready</span>
+          </div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:8px;padding-top:12px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#28c840;box-shadow:0 0 6px rgba(40,200,64,.7)"></div>
+            <span style="font-size:11px;color:var(--text-3);font-family:var(--mono)">Edit saved — 1 file changed</span>
+          </div>
+        </div>
+        <div class="code-pane">
+          <span class="cl"><span class="cm">{%- comment -%} ThemeForge edit — hero overlay {%- endcomment -%}</span></span>
+          <span class="cl">&nbsp;</span>
+          <span class="cl"><span class="cb">&lt;div</span> <span class="ct">class</span>=<span class="cy">"hero__wrap hero__wrap--overlay"</span><span class="cb">&gt;</span></span>
+          <span class="cl">&nbsp; <span class="cb">&lt;div</span> <span class="ct">class</span>=<span class="cy">"hero__bg"</span> <span class="ct">data-parallax</span>=<span class="cy">"0.4"</span><span class="cb">&gt;&lt;/div&gt;</span></span>
+          <span class="cl">&nbsp; <span class="cb">&lt;h1</span> <span class="ct">class</span>=<span class="cy">"hero__title hero__title--accent"</span><span class="cb">&gt;</span></span>
+          <span class="cl">&nbsp;&nbsp;&nbsp; <span class="cp">{{- section.settings.heading | escape -}}</span></span>
+          <span class="cl">&nbsp; <span class="cb">&lt;/h1&gt;</span></span>
+          <span class="cl"><span class="cb">&lt;/div&gt;</span></span>
+          <span class="cl">&nbsp;</span>
+          <span class="cl"><span class="cm">{% schema %}</span></span>
+          <span class="cl">&nbsp; <span class="ct">"name"</span>: <span class="cy">"Hero section"</span>,</span>
+          <span class="cl">&nbsp; <span class="ct">"tag"</span>: <span class="cy">"section"</span>,</span>
+          <span class="cl">&nbsp; <span class="ct">"settings"</span>: [{ <span class="ct">"id"</span>: <span class="cy">"heading"</span> ... }]</span>
+          <span class="cl"><span class="cm">{% endschema %}</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div id="marquee-sec" class="wrap">
+  <p class="marquee-label">Trusted by merchants across Shopify's ecosystem</p>
+  <div class="marquee-track">
+    <div class="marquee-inner" id="marq">
+      <!-- Set A -->
+      <div class="m-item"><div class="m-icon">◈</div><span class="m-name">Allbirds</span></div>
+      <div class="m-item"><div class="m-icon">⬡</div><span class="m-name">Gymshark</span></div>
+      <div class="m-item"><div class="m-icon">◆</div><span class="m-name">Bombas</span></div>
+      <div class="m-item"><div class="m-icon">▲</div><span class="m-name">Ruggable</span></div>
+      <div class="m-item"><div class="m-icon">⬟</div><span class="m-name">Steve Madden</span></div>
+      <div class="m-item"><div class="m-icon">◉</div><span class="m-name">Caraway</span></div>
+      <div class="m-item"><div class="m-icon">◈</div><span class="m-name">Ridge</span></div>
+      <div class="m-item"><div class="m-icon">◆</div><span class="m-name">Graza</span></div>
+      <!-- Set B (duplicate for seamless loop) -->
+      <div class="m-item"><div class="m-icon">◈</div><span class="m-name">Allbirds</span></div>
+      <div class="m-item"><div class="m-icon">⬡</div><span class="m-name">Gymshark</span></div>
+      <div class="m-item"><div class="m-icon">◆</div><span class="m-name">Bombas</span></div>
+      <div class="m-item"><div class="m-icon">▲</div><span class="m-name">Ruggable</span></div>
+      <div class="m-item"><div class="m-icon">⬟</div><span class="m-name">Steve Madden</span></div>
+      <div class="m-item"><div class="m-icon">◉</div><span class="m-name">Caraway</span></div>
+      <div class="m-item"><div class="m-icon">◈</div><span class="m-name">Ridge</span></div>
+      <div class="m-item"><div class="m-icon">◆</div><span class="m-name">Graza</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS ROW -->
+<section style="padding:80px 0">
+  <div class="wrap">
+    <div class="stats-row rev">
+      <div class="stat-item">
+        <div class="stat-val">0</div>
+        <div class="stat-desc">Direct edits to live store — ever</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">7</div>
+        <div class="stat-desc">Validation gates before any commit</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">∞</div>
+        <div class="stat-desc">Full edit history with undo</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">1</div>
+        <div class="stat-desc">Prompt to publish the whole flow</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">The Problem</div>
+      <h2 class="sh">The copy-paste workflow<br>is quietly breaking stores</h2>
+      <div class="teal-line"></div>
+      <p class="sd">Merchants customizing Shopify themes today juggle browser tabs, paste unvetted AI output directly into live files, and hope nothing breaks.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="prob-card g rev">
+        <div class="prob-icon ic-r">⚠</div>
+        <h3>Unoptimized Output</h3>
+        <p>AI chat tools generate working Liquid, rarely optimized Liquid. Pasted code bloats page weight, slows Core Web Vitals, and degrades performance rankings directly.</p>
+      </div>
+      <div class="prob-card g rev">
+        <div class="prob-icon ic-o">⛓</div>
+        <h3>Manual & Error-Prone</h3>
+        <p>Merchants copy snippets across tabs and paste them directly into theme files with no preview, no undo path, and no structured validation. One wrong paste can break the live store.</p>
+      </div>
+      <div class="prob-card g rev">
+        <div class="prob-icon ic-a">◈</div>
+        <h3>Fragile Theme State</h3>
+        <p>Ad-hoc edits accumulate over time, creating themes that are hard to maintain, impossible to hand off, and fragile to future updates. No history, no baseline, no rollback.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION FEATURES -->
+<section id="solution">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">The Solution</div>
+      <h2 class="sh">Purpose-built for<br>Shopify theme editing</h2>
+      <div class="teal-line"></div>
+      <p class="sd">Every change is clean, validated, previewed against your real store, and committed to a draft theme you explicitly approve before it goes live.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card g rev">
+        <span class="feat-num">01 — CLEAN OUTPUT</span>
+        <h3>Optimized Liquid, not raw AI paste</h3>
+        <p>ThemeForge applies performance budgets and automated theme linting to every generated edit. Output follows Shopify best practices — not just functional, but fast and maintainable.</p>
+        <span class="feat-badge">PERFORMANCE-FIRST</span>
+      </div>
+      <div class="feat-card g rev">
+        <span class="feat-num">02 — FAIL SAFE</span>
+        <h3>Validation before anything is saved</h3>
+        <p>Every change is parsed and checked using Shopify's official Liquid parser for syntax and structural correctness before it's committed. A broken edit is never saved to your store.</p>
+        <span class="feat-badge">NEVER BREAKS LIVE STORE</span>
+      </div>
+      <div class="feat-card g rev">
+        <span class="feat-num">03 — REAL PREVIEW</span>
+        <h3>Rendered by Shopify's engine, not a mock</h3>
+        <p>Not a local approximation — your edited theme is rendered by Shopify's own engine. What you see in the preview is precisely what you'll publish. No surprises, no guessing.</p>
+        <span class="feat-badge">PIXEL-PERFECT</span>
+      </div>
+      <div class="feat-card g rev">
+        <span class="feat-num">04 — VERSION CONTROL</span>
+        <h3>Git-style history and conflict detection</h3>
+        <p>Lightweight content-addressed snapshots in PostgreSQL. Compare to the original, undo any change, and detect conflicts if someone edits the live theme outside the platform.</p>
+        <span class="feat-badge">FULL EDIT HISTORY</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">Merchant Flow</div>
+      <h2 class="sh">From prompt to<br>published in 5 steps</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-row rev">
+        <div class="step-wrap"><div class="step-n">1</div><div class="flow-line"></div></div>
+        <div class="step-body">
+          <h3>Connect Your Store</h3>
+          <p>Authorize ThemeForge per-store through a secure authorization step. For early access, this uses per-merchant custom-app tokens — no Shopify App Store exemption required.</p>
+        </div>
+      </div>
+      <div class="flow-row rev">
+        <div class="step-wrap"><div class="step-n">2</div><div class="flow-line"></div></div>
+        <div class="step-body">
+          <h3>Import a Theme</h3>
+          <p>Select any theme. ThemeForge imports all editable files — Liquid, JSON, CSS, JavaScript — and keeps large assets as CDN references. Reading themes requires no special Shopify permission, so this is fully unblocked today.</p>
+        </div>
+      </div>
+      <div class="flow-row rev">
+        <div class="step-wrap"><div class="step-n">3</div><div class="flow-line"></div></div>
+        <div class="step-body">
+          <h3>Edit by Prompt</h3>
+          <p>Describe the change — "restyle the hero section," "add a sticky announcement bar," "fix the product card on mobile." The editing engine scopes, plans, applies, and validates the edit automatically through a 7-stage pipeline.</p>
+        </div>
+      </div>
+      <div class="flow-row rev">
+        <div class="step-wrap"><div class="step-n">4</div><div class="flow-line"></div></div>
+        <div class="step-body">
+          <h3>Preview the Change</h3>
+          <p>See a faithful preview rendered by Shopify's engine on the same screen. Only the changed section re-renders, keeping the loop fast. Iterate on the prompt until it's exactly right.</p>
+        </div>
+      </div>
+      <div class="flow-row rev">
+        <div class="step-wrap"><div class="step-n">5</div></div>
+        <div class="step-body">
+          <h3>Approve and Publish</h3>
+          <p>Changes are exported to a draft theme via delta — only modified files are shipped. A conflict check flags any edits made outside the platform since import. You explicitly approve and publish the draft when you're ready.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINE -->
+<section id="engine">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">Core Differentiator</div>
+      <h2 class="sh">The Editing Engine</h2>
+      <p class="sd">A 7-stage pipeline that converts a natural-language prompt into a safe, optimized edit. Designed to fail safe — a broken edit is never saved.</p>
+    </div>
+    <div class="eng-layout">
+      <div class="stages rev">
+        <div class="stage g"><div class="s-icon">◈</div><div class="s-text"><div class="s-name">Index</div><div class="s-desc">Map the theme's structure on import — templates, sections, blocks</div></div><span class="s-num">01</span></div>
+        <div class="stage g"><div class="s-icon">⊙</div><div class="s-text"><div class="s-name">Scope</div><div class="s-desc">Resolve the prompt to the smallest correct target and layer</div></div><span class="s-num">02</span></div>
+        <div class="stage g"><div class="s-icon">◐</div><div class="s-text"><div class="s-name">Plan</div><div class="s-desc">A code model produces a minimal, targeted edit plan</div></div><span class="s-num">03</span></div>
+        <div class="stage g"><div class="s-icon">⚡</div><div class="s-text"><div class="s-name">Apply</div><div class="s-desc">Edit merged into target file deterministically and at speed</div></div><span class="s-num">04</span></div>
+        <div class="stage g"><div class="s-icon">✓</div><div class="s-text"><div class="s-name">Validate</div><div class="s-desc">Official Liquid parser checks syntax + structural correctness</div></div><span class="s-num">05</span></div>
+        <div class="stage g"><div class="s-icon">◼</div><div class="s-text"><div class="s-name">Commit</div><div class="s-desc">Only validated changes are written as a new version snapshot</div></div><span class="s-num">06</span></div>
+        <div class="stage g"><div class="s-icon">↻</div><div class="s-text"><div class="s-name">Re-render</div><div class="s-desc">Only the changed section re-previews, keeping the loop fast</div></div><span class="s-num">07</span></div>
+      </div>
+      <div class="rev" style="display:flex;flex-direction:column;gap:20px">
+        <div class="eng-panel g g-liquid">
+          <div class="ep-title">Built to<br><span>fail safe</span></div>
+          <p class="ep-body">Every stage is a gate. A broken edit is never saved to the store. The Validate stage uses Shopify's official Liquid parser — not a custom implementation — so the check is authoritative, not approximate.</p>
+          <p class="ep-body">The planning model is a swappable component. ThemeForge defaults to DeepSeek V4 for cost efficiency and automatically escalates to a top-tier model on complex edits — A/B tested on real Shopify themes to calibrate quality.</p>
+          <div class="metrics">
+            <div class="metric"><div class="mv">7</div><div class="ml">Validation Gates</div></div>
+            <div class="metric"><div class="mv">0</div><div class="ml">Direct Live Edits</div></div>
+            <div class="metric"><div class="mv">∞</div><div class="ml">Undo History</div></div>
+          </div>
+        </div>
+        <div class="g" style="padding:24px">
+          <div class="tl">// AI BACKBONE</div>
+          <p style="font-size:14px;color:var(--text-2);line-height:1.75">Powered by <strong style="color:var(--text)">DeepSeek V4</strong> as the cost-efficient default, with automatic escalation to top-tier models on complex edits. The planning model is a swappable component — routes by complexity to control both cost and quality.</p>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+            <span class="wtag wtag-g">DeepSeek V4 default</span>
+            <span class="wtag wtag-b">Auto-escalation</span>
+            <span class="wtag wtag-p">A/B tested</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech" style="background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">Technology Stack</div>
+      <h2 class="sh">Built on the right<br>foundations</h2>
+      <p class="sd">Anchored by Shopify's official Node/TypeScript ecosystem — the constraint that keeps reliability-critical components in one runtime.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card g rev"><div class="tl">Frontend</div><div class="tn">React Router 7</div><div class="td">Shopify's recommended framework with Polaris and App Bridge, shared across the standalone platform and the embedded App Store channel.</div><span class="t-pill">+ Polaris + App Bridge</span></div>
+      <div class="tech-card g rev"><div class="tl">Backend</div><div class="tn">Node.js + TypeScript</div><div class="td">Required to use Shopify's official Liquid parser and theme tooling in one runtime. The core constraint that drives every stack decision correctly.</div><span class="t-pill">Official Liquid Parser</span></div>
+      <div class="tech-card g rev"><div class="tl">Database</div><div class="tn">PostgreSQL + Supabase</div><div class="td">Content-addressed versioning using checksums — full edit history and delta exports without a separate version control system.</div><span class="t-pill">+ Drizzle ORM</span></div>
+      <div class="tech-card g rev"><div class="tl">Jobs & Queue</div><div class="tn">Redis + BullMQ</div><div class="td">Theme edits run as queued background jobs. Shopify's API rate limits make a queue mandatory — BullMQ handles backpressure and retries.</div><span class="t-pill">Rate-Limit Safe</span></div>
+      <div class="tech-card g rev"><div class="tl">AI Planning</div><div class="tn">DeepSeek V4</div><div class="td">Cost-efficient default for the planning model, with automatic escalation on complex edits. Swappable component — continuously A/B tested on real themes.</div><span class="t-pill">Swappable Architecture</span></div>
+      <div class="tech-card g rev"><div class="tl">Infrastructure</div><div class="tn">Cloudflare Workers</div><div class="td">Preview proxy on Cloudflare Workers for edge-fast rendering. Persistent Node hosting for edit workers. Object storage when needed for theme assets.</div><span class="t-pill">Edge Preview Proxy</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section id="risks">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">Risk & Mitigation</div>
+      <h2 class="sh">Key risks, and how<br>we're de-risking them</h2>
+    </div>
+    <div class="risk-grid">
+      <div class="risk-card g rev">
+        <div class="r-head"><div class="r-dot r-hi"></div><div class="r-title">Shopify Write Access</div></div>
+        <p class="r-impact">Without write access, edits cannot reach the merchant's store. Public App Store apps require a "Page builders" category exemption from Shopify.</p>
+        <div class="r-fix"><strong>Mitigation:</strong> Launch on per-merchant custom-app tokens — no exemption needed. Submit the public-app exemption request in parallel. Confirm token write access via a short technical test before building.</div>
+      </div>
+      <div class="risk-card g rev">
+        <div class="r-head"><div class="r-dot r-md"></div><div class="r-title">Preview Embedding Terms</div></div>
+        <p class="r-impact">Embedding the live Shopify preview inside our platform may conflict with Shopify's terms on how store content is presented.</p>
+        <div class="r-fix"><strong>Mitigation:</strong> Confirm in writing with Shopify before building. The preview is built as a swappable module so the embedding method can be replaced without rework if the answer changes.</div>
+      </div>
+      <div class="risk-card g rev">
+        <div class="r-head"><div class="r-dot r-md"></div><div class="r-title">Model Quality & Cost</div></div>
+        <p class="r-impact">Edit quality and per-edit cost directly affect product experience and margins. Poor quality erodes merchant trust; high cost breaks unit economics.</p>
+        <div class="r-fix"><strong>Mitigation:</strong> Planning model is a swappable component. A/B-test candidates on real Shopify theme edits and route by complexity to control cost and quality independently.</div>
+      </div>
+      <div class="risk-card g rev">
+        <div class="r-head"><div class="r-dot r-lo"></div><div class="r-title">Theme Variety</div></div>
+        <p class="r-impact">Shopify themes differ significantly — older legacy architectures vs. modern OS 2.0 themes. Edits that work for one may fail or misfire for another.</p>
+        <div class="r-fix"><strong>Mitigation:</strong> Detect the theme's architecture on import and adapt edits accordingly. The Validate stage handles variety by checking every edit before saving — no theme is assumed safe.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" style="background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)">
+  <div class="wrap">
+    <div class="sec-head rev">
+      <div class="sl">Build Roadmap</div>
+      <h2 class="sh">De-risk first,<br>then ship fast</h2>
+    </div>
+    <div class="road-grid">
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-now">NOW</span>
+        <div class="ph-lbl">PHASE 0</div>
+        <div class="ph-title">De-Risk</div>
+        <p class="ph-desc">Confirm custom-app token write access. Submit the Shopify write-access exemption request. Get preview-terms clarity in writing. Run the edit-quality A/B test on real themes. Finalize the name and schema.</p>
+      </div>
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-now">NOW</span>
+        <div class="ph-lbl">PHASE 1</div>
+        <div class="ph-title">Connect & Import</div>
+        <p class="ph-desc">Store connection, theme listing, and theme import. Reading themes requires no Shopify exemption — fully unblocked and buildable immediately without waiting for any approval.</p>
+      </div>
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-next">NEXT</span>
+        <div class="ph-lbl">PHASE 2</div>
+        <div class="ph-title">Storage & Versioning</div>
+        <p class="ph-desc">Immutable baseline, copy-on-write working copy, checksum-based version model, and the theme structural index that powers precise, targeted edits.</p>
+      </div>
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-next">NEXT</span>
+        <div class="ph-lbl">PHASE 3</div>
+        <div class="ph-title">Editing Engine</div>
+        <p class="ph-desc">The full Scope → Plan → Apply → Validate → Commit pipeline. The core of the product and the primary value differentiator — where ThemeForge earns its keep.</p>
+      </div>
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-next">NEXT</span>
+        <div class="ph-lbl">PHASE 4 + 5</div>
+        <div class="ph-title">Preview & Export</div>
+        <p class="ph-desc">Faithful Shopify-rendered preview, delta export to draft theme, conflict detection against the live theme, and the explicit publish-on-approval flow.</p>
+      </div>
+      <div class="phase-card g rev">
+        <span class="ph-badge ph-later">LATER</span>
+        <div class="ph-lbl">PHASE 6+</div>
+        <div class="ph-title">Enforcement & Modules</div>
+        <p class="ph-desc">Performance budget enforcement, theme linting layer, App Store channel launch, and additional merchant modules — starting with analytics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="wrap">
+    <div class="cta-wrap g g-liquid rev">
+      <div class="sl" style="text-align:center">Early Access</div>
+      <h2>The right way to edit<br>your Shopify theme.</h2>
+      <p>Join the waitlist. We're opening early access to a focused group of merchants and developers before the public launch.</p>
+      <div class="cta-form">
+        <input type="email" class="cta-input" placeholder="your@email.com">
+        <button class="btn-p">Join Waitlist</button>
+      </div>
+      <p class="cta-note">No spam. Early access invite only. Cancel anytime.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="ft">
+      <div class="ft-logo">Theme<em>Forge</em> AI</div>
+      <div class="ft-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Docs</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="ft-copy">© 2026 ThemeForge AI. Built for Shopify merchants.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('vis'), i * 70);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.07, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.rev').forEach(el => obs.observe(el));
+
+  // Counter animation for stats
+  function animateCount(el, target, suffix='') {
+    const dur = 1800, start = performance.now();
+    const isInf = target === Infinity;
+    const frame = (now) => {
+      const t = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      if (isInf) { el.textContent = t > 0.9 ? '∞' : Math.round(ease * 100) + ''; return; }
+      el.textContent = Math.round(ease * target) + suffix;
+      if (t < 1) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  const statObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const vals = e.target.querySelectorAll('.stat-val');
+        vals.forEach(v => {
+          const txt = v.textContent.trim();
+          if (txt === '∞') animateCount(v, Infinity);
+          else if (!isNaN(+txt)) animateCount(v, +txt);
+        });
+        statObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stats-row').forEach(el => statObs.observe(el));
+</script>
+</body>
+</html>
